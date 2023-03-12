@@ -20,7 +20,7 @@ local M = {}
 
 function M.new()
   return setmetatable({
-    enabled = true,
+    use = true,
     interval = 1000,
     always_cursorline = false,
     status = STATUS_DISABLED,
@@ -37,11 +37,11 @@ function M:setup(opt)
   if opt.always_cursorline then
     self.always_cursorline = opt.always_cursorline
   end
+  vim.wo.cursorline = opt.always_cursorline or {}
   self.filetype_exclude = opt.filetype_exclude or {}
   self.buftype_exclude = opt.buf_exclude or {}
-  self:setup_events(opt.force)
   self.status = STATUS_CURSOR
-  vim.wo.cursorline = opt.always_cursorline or {}
+  self:setup_events(opt.force)
 end
 
 function M:setup_events(force)
@@ -55,7 +55,7 @@ function M:setup_events(force)
       group = self.augroup_id,
       desc = "call cursor-x:" .. method .. "()",
       callback = function()
-        if self:is_enabled() then
+        if self:enabled() then
           self[method](self)
         end
       end,
@@ -67,6 +67,25 @@ function M:setup_events(force)
   create_au({ "WinLeave" }, "win_leave")
 end
 
+function M:cursor(appear)
+  if appear then
+    if not self:enabled() then
+      return
+    end
+    self.status = STATUS_CURSOR
+    vim.wo.cursorline = true
+    vim.wo.cursorcolumn = true
+    vim.cmd [[highlight! link CursorLine Visual]]
+    vim.cmd [[highlight! link CursorColumn Visual]]
+  else
+    self.status = STATUS_DISABLED
+    vim.wo.cursorline = self.always_cursorline
+    vim.wo.cursorcolumn = false
+    vim.cmd [[highlight! link CursorLine CursorLine]]
+    vim.cmd [[highlight! link CursorColumn CursorColumn]]
+  end
+end
+
 function M:cursor_moved()
   if self.status == STATUS_WINDOW then
     self.status = STATUS_CURSOR
@@ -74,18 +93,10 @@ function M:cursor_moved()
   end
   self:timer_stop()
   self.timer = vim.defer_fn(function()
-    self.status = STATUS_CURSOR
-    vim.wo.cursorline = true
-    vim.wo.cursorcolumn = true
-    vim.cmd [[highlight! link CursorLine Visual]]
-    vim.cmd [[highlight! link CursorColumn Visual]]
+    self:cursor(true)
   end, self.interval)
   if self.status == STATUS_CURSOR then
-    self.status = STATUS_DISABLED
-    vim.wo.cursorline = self.always_cursorline
-    vim.wo.cursorcolumn = false
-    vim.cmd [[highlight! link CursorLine CursorLine]]
-    vim.cmd [[highlight! link CursorColumn CursorColumn]]
+    self:cursor(false)
   end
 end
 
@@ -108,14 +119,16 @@ function M:timer_stop()
 end
 
 function M:enable()
-  self.enabled = true
+  self.use = true
+  self:cursor(true)
 end
 
 function M:disable()
-  self.enabled = false
+  self.use = false
+  self:cursor(false)
 end
 
-function M:is_enabled()
+function M:enabled()
   local filetype = vim.bo.filetype
   local buftype = vim.bo.buftype
   for _, ft in ipairs(self.filetype_exclude) do
@@ -128,7 +141,7 @@ function M:is_enabled()
       return false
     end
   end
-  return self.enabled
+  return self.use
 end
 
 return M
