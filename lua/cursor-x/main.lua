@@ -37,7 +37,7 @@ function M:setup(opt)
   if opt.always_cursorline then
     self.always_cursorline = opt.always_cursorline
   end
-  vim.wo.cursorline = opt.always_cursorline or {}
+  vim.wo.cursorline = opt.always_cursorline or false
   self.filetype_exclude = opt.filetype_exclude or {}
   self.buftype_exclude = opt.buf_exclude or {}
   self.status = STATUS_CURSOR
