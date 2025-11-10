@@ -163,15 +163,26 @@ function M:cursor(appear)
   end
 end
 
+--- Handle cursor movement event
 function M:cursor_moved()
   if self.status == STATUS_WINDOW then
     self.status = STATUS_CURSOR
     return
   end
   self:timer_stop()
-  self.timer = vim.defer_fn(function()
-    self:cursor(true)
-  end, self.interval)
+
+  -- Create new timer using vim.loop for proper timer management
+  self.timer = vim.loop.new_timer()
+  if self.timer then
+    self.timer:start(
+      self.interval,
+      0,
+      vim.schedule_wrap(function()
+        self:cursor(true)
+      end)
+    )
+  end
+
   if self.status == STATUS_CURSOR then
     self:cursor(false)
   end
