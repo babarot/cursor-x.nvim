@@ -48,17 +48,69 @@ function M.new()
   }, { __index = M })
 end
 
+--- Validate option value types
+--- @param opt table User provided options
+--- @return boolean, string|nil success, error_message
+local function validate_options(opt)
+  if opt.interval ~= nil then
+    if type(opt.interval) ~= "number" or opt.interval <= 0 then
+      return false, "interval must be a positive number"
+    end
+  end
+  if opt.always_cursorline ~= nil and type(opt.always_cursorline) ~= "boolean" then
+    return false, "always_cursorline must be a boolean"
+  end
+  if opt.filetype_exclude ~= nil and type(opt.filetype_exclude) ~= "table" then
+    return false, "filetype_exclude must be a table"
+  end
+  if opt.buftype_exclude ~= nil and type(opt.buftype_exclude) ~= "table" then
+    return false, "buftype_exclude must be a table"
+  end
+  if opt.highlight_cursor_line ~= nil and type(opt.highlight_cursor_line) ~= "string" then
+    return false, "highlight_cursor_line must be a string"
+  end
+  if opt.highlight_cursor_column ~= nil and type(opt.highlight_cursor_column) ~= "string" then
+    return false, "highlight_cursor_column must be a string"
+  end
+  return true, nil
+end
+
+--- Setup the plugin with user options
+--- @param opt table|nil Configuration options
+---   - interval: number (default: 1000) - Time in ms before highlighting appears
+---   - always_cursorline: boolean (default: false) - Always show cursorline
+---   - filetype_exclude: table (default: {}) - Filetypes to exclude
+---   - buftype_exclude: table (default: {}) - Buffer types to exclude
+---   - highlight_cursor_line: string (default: "Visual") - Highlight group for cursor line
+---   - highlight_cursor_column: string (default: "Visual") - Highlight group for cursor column
+---   - force: boolean (default: false) - Force recreate autocommands
 function M:setup(opt)
   opt = opt or {}
+
+  -- Validate options
+  local ok, err = validate_options(opt)
+  if not ok then
+    vim.notify("cursor-x: " .. err, vim.log.levels.ERROR)
+    return
+  end
+
+  -- Apply options
   if opt.interval then
     self.interval = opt.interval
   end
-  if opt.always_cursorline then
+  if opt.always_cursorline ~= nil then
     self.always_cursorline = opt.always_cursorline
   end
-  vim.wo.cursorline = opt.always_cursorline or false
+  if opt.highlight_cursor_line then
+    self.highlight_cursor_line = opt.highlight_cursor_line
+  end
+  if opt.highlight_cursor_column then
+    self.highlight_cursor_column = opt.highlight_cursor_column
+  end
+
+  vim.wo.cursorline = self.always_cursorline
   self.filetype_exclude = opt.filetype_exclude or {}
-  self.buftype_exclude = opt.buf_exclude or {}
+  self.buftype_exclude = opt.buftype_exclude or {}  -- Fixed: was opt.buf_exclude
   self.status = STATUS_CURSOR
   self:setup_events(opt.force)
 end
