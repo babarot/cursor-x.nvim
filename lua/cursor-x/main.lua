@@ -188,21 +188,32 @@ function M:cursor_moved()
   end
 end
 
+--- Handle window enter event
 function M:win_enter()
   vim.wo.cursorline = true
   self.status = STATUS_WINDOW
   self:timer_stop()
 end
 
+--- Handle window leave event
 function M:win_leave()
   vim.wo.cursorline = false
   self:timer_stop()
 end
 
+--- Stop and cleanup the timer
 function M:timer_stop()
-  if self.timer and vim.loop.is_active(self.timer) then
-    self.timer:stop()
-    self.timer:close()
+  if self.timer then
+    -- Check if timer is active before stopping
+    local ok, is_active = pcall(vim.loop.is_active, self.timer)
+    if ok and is_active then
+      self.timer:stop()
+    end
+    -- Always try to close the timer handle
+    if not self.timer:is_closing() then
+      self.timer:close()
+    end
+    self.timer = nil
   end
 end
 
