@@ -1,0 +1,205 @@
+*cursor-x.txt*	Automatically highlight cursorline and cursorcolumn
+
+Author: babarot
+License: MIT
+Repository: https://github.com/babarot/cursor-x.nvim
+
+==============================================================================
+CONTENTS						      *cursor-x-contents*
+
+Introduction		|cursor-x-introduction|
+Requirements		|cursor-x-requirements|
+Installation		|cursor-x-installation|
+Configuration		|cursor-x-configuration|
+Functions		|cursor-x-functions|
+Commands		|cursor-x-commands|
+
+==============================================================================
+INTRODUCTION						  *cursor-x-introduction*
+
+cursor-x.nvim is a Neovim plugin that automatically highlights the cursor
+line and cursor column after a configurable delay when the cursor stops
+moving.
+
+This helps you locate your cursor position without having the cursorline and
+cursorcolumn always visible, which can be distracting during editing.
+
+Features:
+  - Auto-highlight cursorline and cursorcolumn after cursor stops
+  - Configurable delay time
+  - Customizable highlight groups
+  - Filetype and buftype exclusion support
+  - Window-aware highlighting
+
+==============================================================================
+REQUIREMENTS						  *cursor-x-requirements*
+
+- Neovim >= 0.7.0
+
+==============================================================================
+INSTALLATION						   *cursor-x-installation*
+
+Using lazy.nvim: >lua
+  {
+    'babarot/cursor-x.nvim',
+    event = { 'BufRead' },
+    config = function()
+      require('cursor-x').setup({
+        interval = 3000, -- 3 seconds
+      })
+    end,
+  }
+<
+
+Using packer.nvim: >lua
+  use {
+    'babarot/cursor-x.nvim',
+    config = function()
+      require('cursor-x').setup()
+    end,
+  }
+<
+
+Manual installation:
+  Clone the repository to your 'packpath' and call |cursor-x.setup()| in
+  your |init.lua|.
+
+==============================================================================
+CONFIGURATION						 *cursor-x-configuration*
+
+Call the setup function with a configuration table: >lua
+  require('cursor-x').setup({
+    interval = 3000,
+    always_cursorline = false,
+    filetype_exclude = { 'neo-tree', 'yaml' },
+    buftype_exclude = {},
+    highlight_cursor_line = 'Visual',
+    highlight_cursor_column = 'Visual',
+  })
+<
+
+Configuration options:
+
+						 *cursor-x-config-interval*
+interval~
+  Type: number
+  Default: 1000
+
+  Time in milliseconds to wait before showing the cursor highlight after
+  the cursor stops moving.
+
+  Example: >lua
+    require('cursor-x').setup({
+      interval = 3000, -- Wait 3 seconds
+    })
+<
+					    *cursor-x-config-always_cursorline*
+always_cursorline~
+  Type: boolean
+  Default: false
+
+  Whether to always show the cursorline (even when cursor is moving).
+
+  Example: >lua
+    require('cursor-x').setup({
+      always_cursorline = true,
+      -- Or use your current setting:
+      -- always_cursorline = vim.opt.cursorline:get(),
+    })
+<
+					   *cursor-x-config-filetype_exclude*
+filetype_exclude~
+  Type: table
+  Default: {}
+
+  List of filetypes to exclude from cursor highlighting.
+
+  Example: >lua
+    require('cursor-x').setup({
+      filetype_exclude = { 'neo-tree', 'NvimTree', 'help' },
+    })
+<
+					    *cursor-x-config-buftype_exclude*
+buftype_exclude~
+  Type: table
+  Default: {}
+
+  List of buffer types to exclude from cursor highlighting.
+
+  Example: >lua
+    require('cursor-x').setup({
+      buftype_exclude = { 'terminal', 'nofile' },
+    })
+<
+				       *cursor-x-config-highlight_cursor_line*
+highlight_cursor_line~
+  Type: string
+  Default: "Visual"
+
+  Highlight group to use for the cursor line.
+
+  Example: >lua
+    require('cursor-x').setup({
+      highlight_cursor_line = 'CursorLine',
+    })
+<
+				     *cursor-x-config-highlight_cursor_column*
+highlight_cursor_column~
+  Type: string
+  Default: "Visual"
+
+  Highlight group to use for the cursor column.
+
+  Example: >lua
+    require('cursor-x').setup({
+      highlight_cursor_column = 'Search',
+    })
+<
+
+==============================================================================
+FUNCTIONS						     *cursor-x-functions*
+
+							  *cursor-x.setup()*
+cursor-x.setup({config})
+  Initialize the plugin with the given configuration.
+
+  Parameters: ~
+    {config} (table|nil) Configuration options. See |cursor-x-configuration|.
+
+  Example: >lua
+    require('cursor-x').setup({
+      interval = 2000,
+    })
+<
+
+							 *cursor-x.enable()*
+cursor-x.enable()
+  Enable cursor highlighting globally.
+
+  Example: >lua
+    require('cursor-x').enable()
+<
+
+							*cursor-x.disable()*
+cursor-x.disable()
+  Disable cursor highlighting globally.
+
+  Example: >lua
+    require('cursor-x').disable()
+<
+
+==============================================================================
+COMMANDS						      *cursor-x-commands*
+
+							   *:CursorXEnable*
+:CursorXEnable
+  Enable cursor-x highlighting.
+  Equivalent to |cursor-x.enable()|.
+
+							  *:CursorXDisable*
+:CursorXDisable
+  Disable cursor-x highlighting.
+  Equivalent to |cursor-x.disable()|.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet:fen:
