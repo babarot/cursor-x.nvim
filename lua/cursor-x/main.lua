@@ -1,7 +1,9 @@
+--- Status constants
 local STATUS_DISABLED = 0
 local STATUS_CURSOR = 1
 local STATUS_WINDOW = 2
 
+--- Cached vim.api wrapper for performance
 local api = setmetatable({ _cache = {} }, {
   __index = function(self, name)
     if not self._cache[name] then
@@ -16,16 +18,33 @@ local api = setmetatable({ _cache = {} }, {
   end,
 })
 
+--- @class CursorX
+--- @field use boolean Whether the plugin is enabled
+--- @field interval number Time in milliseconds before highlighting appears
+--- @field always_cursorline boolean Whether to always show cursorline
+--- @field highlight_cursor_line string Highlight group for cursor line
+--- @field highlight_cursor_column string Highlight group for cursor column
+--- @field status number Current status (DISABLED, CURSOR, or WINDOW)
+--- @field augroup_id number|nil Autocommand group ID
+--- @field timer userdata|nil Timer object
+--- @field filetype_exclude table<string> List of filetypes to exclude
+--- @field buftype_exclude table<string> List of buftypes to exclude
 local M = {}
 
+--- Create a new CursorX instance
+--- @return CursorX
 function M.new()
   return setmetatable({
     use = true,
     interval = 1000,
     always_cursorline = false,
+    highlight_cursor_line = "Visual",
+    highlight_cursor_column = "Visual",
     status = STATUS_DISABLED,
     augroup_id = nil,
     timer = nil,
+    filetype_exclude = {},
+    buftype_exclude = {},
   }, { __index = M })
 end
 
