@@ -217,30 +217,43 @@ function M:timer_stop()
   end
 end
 
+--- Enable cursor highlighting globally
 function M:enable()
   self.use = true
   self:cursor(true)
 end
 
+--- Disable cursor highlighting globally
 function M:disable()
   self.use = false
   self:cursor(false)
 end
 
+--- Check if the plugin is enabled for the current buffer
+--- @return boolean Whether highlighting is enabled
 function M:enabled()
+  if not self.use then
+    return false
+  end
+
   local filetype = vim.bo.filetype
   local buftype = vim.bo.buftype
+
+  -- Check if current filetype is excluded
   for _, ft in ipairs(self.filetype_exclude) do
     if ft == filetype then
       return false
     end
   end
+
+  -- Check if current buftype is excluded
   for _, bt in ipairs(self.buftype_exclude) do
     if bt == buftype then
       return false
     end
   end
-  return self.use
+
+  return true
 end
 
 return M
