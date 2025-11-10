@@ -115,6 +115,8 @@ function M:setup(opt)
   self:setup_events(opt.force)
 end
 
+--- Setup autocommand events
+--- @param force boolean|nil Force recreate autocommands even if already exist
 function M:setup_events(force)
   if self.augroup_id and not force then
     return
@@ -138,6 +140,8 @@ function M:setup_events(force)
   create_au({ "WinLeave" }, "win_leave")
 end
 
+--- Toggle cursor highlighting
+--- @param appear boolean Whether to show or hide cursor highlighting
 function M:cursor(appear)
   if appear then
     if not self:enabled() then
@@ -146,12 +150,14 @@ function M:cursor(appear)
     self.status = STATUS_CURSOR
     vim.wo.cursorline = true
     vim.wo.cursorcolumn = true
-    vim.cmd [[highlight! link CursorLine Visual]]
-    vim.cmd [[highlight! link CursorColumn Visual]]
+    -- Use configured highlight groups
+    vim.cmd(string.format("highlight! link CursorLine %s", self.highlight_cursor_line))
+    vim.cmd(string.format("highlight! link CursorColumn %s", self.highlight_cursor_column))
   else
     self.status = STATUS_DISABLED
     vim.wo.cursorline = self.always_cursorline
     vim.wo.cursorcolumn = false
+    -- Restore default highlighting
     vim.cmd [[highlight! link CursorLine CursorLine]]
     vim.cmd [[highlight! link CursorColumn CursorColumn]]
   end
