@@ -1,7 +1,11 @@
 --- cursor-x.nvim
 --- Automatically highlight the cursorline and cursorcolumn after a configurable delay
+--- @module cursor-x
 
-local main = require("cursor-x.main").new()
+local highlight = require("cursor-x.highlight")
+local instance = highlight.new()
+
+local M = {}
 
 --- Setup cursor-x plugin
 --- @param opt table|nil Configuration options
@@ -11,22 +15,18 @@ local main = require("cursor-x.main").new()
 ---   - buftype_exclude: table (default: {}) - Buffer types to exclude
 ---   - highlight_cursor_line: string (default: "Visual") - Highlight group for cursor line
 ---   - highlight_cursor_column: string (default: "Visual") - Highlight group for cursor column
-local function setup(opt)
-  main:setup(opt)
+function M.setup(opt)
+  instance:setup(opt)
 end
 
 --- Enable cursor highlighting globally
-local function enable()
-  main:enable()
+function M.enable()
+  instance:enable()
 end
 
 --- Disable cursor highlighting globally
-local function disable()
-  main:disable()
+function M.disable()
+  instance:disable()
 end
 
-return {
-  setup = setup,
-  enable = enable,
-  disable = disable,
-}
+return M
